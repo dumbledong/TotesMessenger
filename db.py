@@ -123,12 +123,12 @@ def populate_db():
             cur.execute("""
             UPDATE users SET skip_link=%s
             WHERE name=%s
-            """, (False, user))
+            """, (True, user))
         else:
             print("Inserting {}".format(user))
             cur.execute("""
             INSERT INTO users (name, skip_link) VALUES (%s, %s)
-            """, (user, False))
+            """, (user, True))
 
     db.commit()
     print("Default settings setup.")
