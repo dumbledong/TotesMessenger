@@ -4,7 +4,7 @@ import sqlite3
 
 from urllib.parse import urlparse
 
-from settings import IGNORED_BOTH, IGNORED_LINKS, IGNORED_SOURCES, IGNORED_USERS
+from settings import IGNORED_BOTH, WATCHED_LINKS, WATCHED_SOURCES, IGNORED_USERS
 
 
 db = sqlite3.connect('totes.sqlite3')
@@ -18,8 +18,8 @@ def create_tables():
     cur.execute("""
     CREATE TABLE subreddits (
         name         TEXT  PRIMARY KEY,
-        skip_source  BOOLEAN      DEFAULT FALSE,
-        skip_link    BOOLEAN      DEFAULT FALSE,
+        watch_source BOOLEAN      DEFAULT FALSE,
+        watch_link   BOOLEAN      DEFAULT FALSE,
         language     TEXT         DEFAULT 'en',
         t            TIMESTAMP    DEFAULT CURRENT_TIMESTAMP
     )
@@ -28,8 +28,8 @@ def create_tables():
     cur.execute("""
     CREATE TABLE users (
         name         TEXT  PRIMARY KEY,
-        skip_source  BOOLEAN      DEFAULT FALSE,
-        skip_link    BOOLEAN      DEFAULT FALSE,
+        watch_source  BOOLEAN      DEFAULT FALSE,
+        watch_link    BOOLEAN      DEFAULT FALSE,
         t            TIMESTAMP    DEFAULT CURRENT_TIMESTAMP
     )
     """)
@@ -41,7 +41,7 @@ def create_tables():
         subreddit  TEXT,
         author     TEXT,
         title      TEXT,
-        skip       BOOLEAN      DEFAULT FALSE,
+        watch      BOOLEAN      DEFAULT FALSE,
         t          TIMESTAMP    DEFAULT CURRENT_TIMESTAMP
     )
     """)
@@ -54,7 +54,7 @@ def create_tables():
         author     TEXT,
         title      TEXT,
         permalink  TEXT,
-        skip       BOOLEAN       DEFAULT FALSE,
+        watch      BOOLEAN       DEFAULT TRUE,
         t          TIMESTAMP     DEFAULT CURRENT_TIMESTAMP
     )
     """)
@@ -75,17 +75,17 @@ def user_exists(user):
     return True if cur.fetchone() else False
 
 def populate_db():
-    for sub in IGNORED_SOURCES:
+    for sub in WATCHED_SOURCES:
         if sub_exists(sub):
             print("Updating {}".format(sub))
             cur.execute("""
-            UPDATE subreddits SET skip_source=%s
+            UPDATE subreddits SET watch_source=%s
             WHERE name=%s
             """, (True, sub))
         else:
             print("Inserting {}".format(sub))
             cur.execute("""
-            INSERT INTO subreddits (name, skip_source)
+            INSERT INTO subreddits (name, watch_source)
             VALUES (%s, %s)
             """, (sub, True))
 
@@ -93,27 +93,27 @@ def populate_db():
         if sub_exists(sub):
             print("Updating {}".format(sub))
             cur.execute("""
-            UPDATE subreddits SET skip_source=%s, skip_link=%s
+            UPDATE subreddits SET watch_source=%s, watch_link=%s
             WHERE name=%s
-            """, (True, True, sub))
+            """, (False, False, sub))
         else:
             print("Inserting {}".format(sub))
             cur.execute("""
-            INSERT INTO subreddits (name, skip_source, skip_link)
+            INSERT INTO subreddits (name, watch_source, watch_link)
             VALUES (%s, %s, %s)
-            """, (sub, True, True))
+            """, (sub, False, False))
 
-    for sub in IGNORED_LINKS:
+    for sub in WATCHED_LINKS:
         if sub_exists(sub):
             print("Updating {}".format(sub))
             cur.execute("""
-            UPDATE subreddits SET skip_link=%s
+            UPDATE subreddits SET watch_link=%s
             WHERE name=%s
             """, (True, sub))
         else:
             print("Inserting {}".format(sub))
             cur.execute("""
-            INSERT INTO subreddits (name, skip_link)
+            INSERT INTO subreddits (name, watch_link)
             VALUES (%s, %s)
             """, (sub, True))
 
@@ -121,14 +121,14 @@ def populate_db():
         if user_exists(user):
             print("Updating {}".format(user))
             cur.execute("""
-            UPDATE users SET skip_link=%s
+            UPDATE users SET watch_link=%s
             WHERE name=%s
-            """, (True, user))
+            """, (False, user))
         else:
             print("Inserting {}".format(user))
             cur.execute("""
-            INSERT INTO users (name, skip_link) VALUES (%s, %s)
-            """, (user, True))
+            INSERT INTO users (name, watch_link) VALUES (%s, %s)
+            """, (user, False))
 
     db.commit()
     print("Default settings setup.")
