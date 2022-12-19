@@ -14,7 +14,7 @@ class I18n:
 
         if langcode is None:
             langcode = DEFAULT_LANG
-        self.translations = {}
+        self.translations = {"en"}
         import os
         for file in os.listdir(I18N_PATH):
             if file.endswith(".i18n"):
