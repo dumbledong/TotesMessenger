@@ -509,7 +509,7 @@ class Totes:
             skip_any = source.skip or link.skip
             any_new = source.is_new or link.is_new
 
-            if source.subreddit == "subredditsimulator" and link.subreddit != "subredditsimmeta":
+            if source.subreddit != "relationship_advice" and link.subreddit != "bestofredditorupdates":
                 skip_any = True
 
             log.debug("Skip any: {}".format(skip_any))
