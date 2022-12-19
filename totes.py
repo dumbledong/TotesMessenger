@@ -13,7 +13,7 @@ from praw.exceptions import APIException, ClientException, PRAWException
 from requests.exceptions import RequestException
 
 # Internationalization stuff
-from i18n import TranslationException, I18n, DEFAULT_LANG
+# from i18n import TranslationException, I18n, DEFAULT_LANG
 
 from urllib.parse import urlparse
 from datetime import datetime, timezone
@@ -33,7 +33,7 @@ logging.getLogger('prawcore').setLevel(loglevel)
 db = sqlite3.connect(DB_FILE)
 cur = db.cursor()
 
-i18n = I18n()
+# i18n = I18n()
 
 PATH_REGEX = re.compile(r'^/r/([^/]+)/comments/([a-z0-9]{6,8})(/[^/]+/([a-z0-9]{6,8}))?')
 
@@ -346,26 +346,26 @@ class Notification:
         self.reply = source.reply
         self.links = []
 
-    def set_language(self):
-        source_subreddit = self.source.subreddit
+   # def set_language(self):
+        #source_subreddit = self.source.subreddit
 
-        query = cur.execute(
-            "SELECT language FROM subreddits WHERE name = ?",
-            (source_subreddit,))
+        #query = cur.execute(
+        #    "SELECT language FROM subreddits WHERE name = ?",
+        #    (source_subreddit,))
 
-        lang = query.fetchone()
+        #lang = query.fetchone()
 
-        if lang is None:
-            try:
-                lang = [self.reddit.subreddit(source_subreddit).lang]
-            except RECOVERABLE_EXC as e:
-                log_error(e)
-                lang = [DEFAULT_LANG]  # use default if reddit fails
+        #if lang is None:
+        #    try:
+        #        lang = [self.reddit.subreddit(source_subreddit).lang]
+        #    except RECOVERABLE_EXC as e:
+        #        log_error(e)
+        #        lang = [DEFAULT_LANG]  # use default if reddit fails
 
-        try:
-            i18n.setlang(lang[0])
-        except TranslationException:
-            i18n.setlang(DEFAULT_LANG)
+        #try:
+        #    i18n.setlang(lang[0])
+        #except TranslationException:
+        #    i18n.setlang(DEFAULT_LANG)
 
     def should_notify(self):
         query = cur.execute("""
@@ -407,33 +407,46 @@ Source: {}
         return True
 
     def _render_comment(self):
-        self.set_language()
+        # self.set_language()
 
-        translation_link = TRANSLATION_ERROR_LINK.format(language=i18n.name)
-        translation_link = translation_link.replace(" ", "%20")
+        # translation_link = TRANSLATION_ERROR_LINK.format(language=i18n.name)
+        # translation_link = translation_link.replace(" ", "%20")
 
-        footer_links = i18n.get("infolink").format(info=INFO_LINK,
-                                                   contact=CONTACT_LINK,
-                                                   translation=translation_link,
-                                                   language=i18n.name)
+        # footer_links = i18n.get("infolink").format(info=INFO_LINK,
+        #                                            contact=CONTACT_LINK,
+        #                                            translation=translation_link,
+        #                                            language=i18n.name)
+        # parts = []
+
+        # parts.append(i18n.get("linkingnotification"))
+
+        # cutoff_title = len(self.links) > LINKS_BEFORE_TITLE_CUTOFF
+
+        # for subreddit, title, permalink in self.links:
+        #     if cutoff_title and len(title) > TITLE_LIMIT:
+        #         title = title[:TITLE_LIMIT] + "..."
+        #     parts.append("- [/r/{}] [{}]({})".format(subreddit,
+        #                                              escape_title(title),
+        #                                              link_url(permalink)))
+
+        # parts.append("&nbsp;*^({}) {}*".format(i18n.get("votingwarning"),
+        #                                        footer_links))
+
+        # return "\n\n".join(parts)
         parts = []
-
-        parts.append(i18n.get("linkingnotification"))
-
-        cutoff_title = len(self.links) > LINKS_BEFORE_TITLE_CUTOFF
+        parts.append("This thread has been linked to from another place on reddit.")
 
         for subreddit, title, permalink in self.links:
-            if cutoff_title and len(title) > TITLE_LIMIT:
-                title = title[:TITLE_LIMIT] + "..."
-            parts.append("- [/r/{}] [{}]({})".format(subreddit,
-                                                     escape_title(title),
-                                                     link_url(permalink)))
+            parts.append("- [/r/{}] [{}]({})".format(subreddit, title, np(permalink)))
 
-        parts.append("&nbsp;*^({}) {}*".format(i18n.get("votingwarning"),
-                                               footer_links))
+        parts.append("""
+[](#footer)*^(If you follow any of the above links, respect the rules of reddit and don't vote.)
+            ^\([Info](/r/TotesMessenger/wiki/)
+            ^/
+            ^[Contact](/message/compose/?to=\/r\/TotesMessenger))* [](#bot)
+        """)
 
         return "\n\n".join(parts)
-
 
 
 class Totes:
