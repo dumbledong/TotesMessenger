@@ -23,3 +23,8 @@ INFO_LINK = "/r/TotesMessenger"
 CONTACT_LINK = "/message/compose?to=/r/TotesMessenger"
 TRANSLATION_ERROR_LINK = CONTACT_LINK + "&subject=translation error " \
                                         "({language}\)"
+
+WATCHED_SOURCES = set(["relationship_advice", "pinkfloyd"])
+WATCHED_LINKS = set(["bestofredditorupdates", "pinkfloydcirclejerk"])
+IGNORED_BOTH = set([""])
+IGNORED_USERS = set([""])
